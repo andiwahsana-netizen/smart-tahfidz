@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/* 
+  Mendaftarkan variabel CSS ke sistem Tailwind v4 
+  agar utility class seperti bg-background, border-border, text-primary berfungsi
+*/
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* 
+  Nilai Tema Emerald Gelap (HSL tanpa komma, standar CSS modern) 
+*/
+:root {
+  --radius: 0.75rem;
+  
+  --background: 150 20% 4%;
+  --foreground: 140 20% 90%;
+  
+  --card: 150 20% 7%;
+  --card-foreground: 140 20% 90%;
+  
+  --popover: 150 20% 7%;
+  --popover-foreground: 140 20% 90%;
+  
+  --primary: 160 65% 50%;
+  --primary-foreground: 150 20% 4%;
+  
+  --secondary: 150 20% 10%;
+  --secondary-foreground: 140 20% 90%;
+  
+  --muted: 150 20% 10%;
+  --muted-foreground: 150 15% 45%;
+  
+  --accent: 160 65% 50%;
+  --accent-foreground: 150 20% 4%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 140 20% 90%;
+  
+  --border: 160 65% 20%;
+  --input: 160 65% 20%;
+  --ring: 160 65% 50%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
