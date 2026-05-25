@@ -13,6 +13,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [isRegister, setIsRegister] = useState(false) // State untuk toggle form
 
+  console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log("KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
