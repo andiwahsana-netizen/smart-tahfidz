@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { AppSidebar } from '@/components/app-sidebar'
 import { MobileSidebar } from '@/components/mobile-sidebar'
 
-// Tambahkan baris ini agar Next.js tidak mencoba membuat halaman ini menjadi statis
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardLayout({
@@ -11,23 +10,43 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  let session = null
+  let safeProfile = { nama: 'User', role: 'guru', subscription_plan: 'free' }
 
-  if (!session) {
+  try {
+    const supabase = await createClient()
+    const { data, error: sessionError } = await supabase.auth.getSession()
+
+    if (sessionError) {
+      console.error('Session Error:', sessionError.message)
+    }
+
+    session = data.session
+
+    if (session) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single()
+
+      if (profile) {
+        safeProfile = profile
+      } else {
+        safeProfile.nama = session.user.user_metadata?.nama || 'User'
+        safeProfile.role = session.user.user_metadata?.role || 'guru'
+      }
+    }
+  } catch (error: any) {
+    // Jika ada error kritis (misal Env Variable Supabase tidak ada di Vercel),
+    // Catat di log Vercel, dan arahkan ke login agar tidak layar hitam.
+    console.error('DASHBOARD LAYOUT CRASHED:', error.message)
     return redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', session.user.id)
-    .single()
-
-  const safeProfile = profile || {
-    nama: session.user.user_metadata?.nama || 'User',
-    role: session.user.user_metadata?.role || 'guru',
-    subscription_plan: 'free'
+  // Jika tidak ada session, lempar ke login
+  if (!session) {
+    return redirect('/login')
   }
 
   return (
