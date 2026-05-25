@@ -12,23 +12,31 @@ export default async function DashboardLayout({
 }) {
   let session = null
   let safeProfile = { nama: 'User', role: 'guru', subscription_plan: 'free' }
+  let layoutError = null // Variabel untuk menampung error
 
   try {
     const supabase = await createClient()
     const { data, error: sessionError } = await supabase.auth.getSession()
 
     if (sessionError) {
-      console.error('Session Error:', sessionError.message)
+      // Jika ada error sesi, simpan pesannya, JANGAN langsung redirect
+      layoutError = `Session Error: ${sessionError.message}`
+      console.error(layoutError)
     }
 
     session = data.session
 
     if (session) {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', session.user.id)
         .single()
+
+      if (profileError) {
+        layoutError = `Profile Error: ${profileError.message}`
+        console.error(layoutError)
+      }
 
       if (profile) {
         safeProfile = profile
@@ -38,17 +46,28 @@ export default async function DashboardLayout({
       }
     }
   } catch (error: any) {
-    // Jika ada error kritis (misal Env Variable Supabase tidak ada di Vercel),
-    // Catat di log Vercel, dan arahkan ke login agar tidak layar hitam.
-    console.error('DASHBOARD LAYOUT CRASHED:', error.message)
-    return redirect('/login')
+    // Tangkap error fatal (misal Env Variable hilang)
+    layoutError = `Fatal Layout Error: ${error.message}`
+    console.error(layoutError)
   }
 
-  // Jika tidak ada session, lempar ke login
+  // Jika ada error, TAMPILKAN di layar agar kita bisa baca
+  if (layoutError) {
+    return (
+      <div style={{ padding: '40px', color: 'red', backgroundColor: 'black', minHeight: '100vh', fontFamily: 'monospace' }}>
+        <h1>Error di Server Layout</h1>
+        <p>Pesan Error: <strong>{layoutError}</strong></p>
+        <p style={{color:'gray', marginTop:'20px'}}>Cek apakah Environment Variables di Vercel sudah benar, dan URL Vercel sudah didaftarkan di Supabase Auth Settings.</p>
+      </div>
+    )
+  }
+
+  // Jika tidak ada sesi (user memang belum login), baru redirect ke login
   if (!session) {
     return redirect('/login')
   }
 
+  // Jika semuanya aman, render dashboard
   return (
     <div className="flex min-h-screen bg-[#0a0f0d]">
       <div className="hidden md:block">
