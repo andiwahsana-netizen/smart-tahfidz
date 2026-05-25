@@ -39,11 +39,9 @@ export function AddKelasDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-        <div className="bg-gradient-to-r from-[#2dd4a0] to-[#059669] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-[#2dd4a0]/20 transition-all cursor-pointer inline-flex items-center">
-          <i className="fas fa-plus mr-2"></i>Buat Kelas Baru
-        </div>
-      </DialogTrigger>
+            <DialogTrigger className="bg-gradient-to-r from-[#2dd4a0] to-[#059669] text-white px-4 py-2 rounded-lg">
+  <i className="fas fa-plus mr-2"></i>Buat Kelas Baru
+</DialogTrigger>
       <DialogContent className="bg-[#111a15] border border-[#2dd4a0]/10 text-white sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-white">Buat Kelas / Kelompok Baru</DialogTitle>

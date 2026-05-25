@@ -54,20 +54,18 @@ export function AddSantriDialog({ currentSantriCount, plan }: { currentSantriCou
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {limitReached ? (
-          <button disabled className="bg-gray-600/50 text-gray-400 px-4 py-2 rounded-lg text-sm font-semibold cursor-not-allowed relative group">
-            <i className="fas fa-plus mr-2"></i>Tambah Santri
-            <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-              Batas Free tercapai (5/5)
-            </span>
-          </button>
-        ) : (
-          <button className="bg-gradient-to-r from-[#2dd4a0] to-[#059669] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-[#2dd4a0]/20 transition-all">
-            <i className="fas fa-plus mr-2"></i>Tambah Santri
-          </button>
-        )}
-      </DialogTrigger>
+           {limitReached ? (
+        <DialogTrigger disabled className="bg-gray-600/50 text-gray-400 px-4 py-2 rounded-lg text-sm font-semibold cursor-not-allowed relative group inline-flex items-center justify-center">
+          <i className="fas fa-plus mr-2"></i>Tambah Santri
+          <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            Batas Free tercapai (5/5)
+          </span>
+        </DialogTrigger>
+      ) : (
+        <DialogTrigger className="bg-gradient-to-r from-[#2dd4a0] to-[#059669] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-[#2dd4a0]/20 transition-all inline-flex items-center justify-center">
+          <i className="fas fa-plus mr-2"></i>Tambah Santri
+        </DialogTrigger>
+      )}
       
       {!limitReached && (
         <DialogContent className="bg-[#111a15] border border-[#2dd4a0]/10 text-white sm:max-w-[425px]">

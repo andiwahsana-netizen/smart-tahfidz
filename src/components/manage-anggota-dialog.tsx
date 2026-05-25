@@ -40,10 +40,8 @@ export function ManageAnggotaDialog({ kelasId, kelasNama, currentSantriIds, allS
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-        <div className="px-3 py-1.5 text-xs font-semibold border border-[#2dd4a0]/20 text-[#2dd4a0] rounded-lg hover:bg-[#2dd4a0]/10 transition-colors cursor-pointer inline-flex items-center">
-          <i className="fas fa-user-edit mr-1"></i> Kelola
-        </div>
+              <DialogTrigger className="px-3 py-1.5 text-xs font-semibold border border-[#2dd4a0]/20 text-[#2dd4a0] rounded-lg hover:bg-[#2dd4a0]/10 transition-colors inline-flex items-center justify-center">
+        <i className="fas fa-user-edit mr-1"></i> Kelola
       </DialogTrigger>
       <DialogContent className="bg-[#111a15] border border-[#2dd4a0]/10 text-white sm:max-w-[425px]">
         <DialogHeader>
