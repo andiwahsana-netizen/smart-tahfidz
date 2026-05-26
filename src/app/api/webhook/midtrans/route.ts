@@ -3,34 +3,27 @@ import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 
 export async function POST(request: NextRequest) {
-  // 1. CEK ENV VARIABLES (PENTING UNTUK DEBUG VERCEL)
-  const serverKey = process.env.MIDTRANS_SERVER_KEY
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!serverKey || !supabaseUrl || !supabaseServiceKey) {
-    console.error('WEBHOOK ERROR: Environment Variables tidak ditemukan di Vercel!')
-    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
-  }
-
-  // 2. BACA BODY DARI MIDTRANS
-  let body
-  try {
-    body = await request.json()
-  } catch (error) {
-    console.error('WEBHOOK ERROR: Gagal membaca request body')
-    return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
-  }
+  const body = await request.json()
 
   const {
     order_id,
     status_code,
     gross_amount,
     transaction_status,
-    signature_key
+    signature_key,
+    custom_field1 // Ambil User ID dari sini
   } = body
 
-  // 3. VERIFIKASI KEAMANAN SIGNATURE
+  // 1. Verifikasi Keamanan
+  const serverKey = process.env.MIDTRANS_SERVER_KEY
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!serverKey || !supabaseUrl || !supabaseServiceKey) {
+    console.error('WEBHOOK ERROR: Env Variables hilang!')
+    return NextResponse.json({ error: 'Server config error' }, { status: 500 })
+  }
+
   const mySignatureKey = crypto
     .createHash('sha512')
     .update(order_id + status_code + gross_amount + serverKey)
@@ -41,23 +34,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid Signature' }, { status: 403 })
   }
 
-  // 4. PROSES JIKA PEMBAYARAN SUKSES
+  // 2. Proses jika pembayaran sukses
   if (transaction_status === 'capture' || transaction_status === 'settlement') {
     
-    // Parsing Order ID (Format: UPGRADE_uuid_timestamp)
-    const parts = order_id.split('_')
-    if (parts.length < 2) {
-      console.error('WEBHOOK ERROR: Format Order ID salah -> ' + order_id)
-      return NextResponse.json({ error: 'Invalid Order ID format' }, { status: 400 })
-    }
-    
-    const userId = parts[1]
-    console.log(`WEBHOOK INFO: Menerima pembayaran sukses untuk User ID: ${userId}`)
+    // 3. Ambil User ID dari custom_field1
+    const userId = custom_field1
 
-    // 5. INISIALISASI SUPABASE ADMIN
+    if (!userId) {
+      console.error('WEBHOOK ERROR: User ID tidak ditemukan di custom_field1')
+      return NextResponse.json({ error: 'User ID missing' }, { status: 400 })
+    }
+
+    console.log(`WEBHOOK INFO: Upgrade user ${userId} ke Pro`)
+
+    // 4. Update Database
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
-    // 6. UPDATE DATABASE
     const { error } = await supabaseAdmin
       .from('profiles')
       .update({ subscription_plan: 'pro' })
@@ -71,6 +63,5 @@ export async function POST(request: NextRequest) {
     console.log(`WEBHOOK SUCCESS: User ${userId} berhasil di-upgrade ke PRO!`)
   }
 
-  // Kembalikan 200 ke Midtrans agar Midtrans tidak terus menerus mengirim notifikasi
   return NextResponse.json({ status: 'ok' })
 }

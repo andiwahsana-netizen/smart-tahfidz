@@ -1,34 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Konfigurasi Midtrans
 const midtransClient = require('midtrans-client')
-let snap = new midtransClient.Snap({
-  isProduction: false, // false untuk Sandbox, true untuk Production
-  serverKey: process.env.MIDTRANS_SERVER_KEY,
-})
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  
-  if (error || !user) {
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const serverKey = process.env.MIDTRANS_SERVER_KEY
+  if (!serverKey) {
+    console.error('MIDTRANS_SERVER_KEY tidak ditemukan di Vercel Env!')
+    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+  }
 
-  // Ambil nama user untuk ditampilkan di receipt Midtrans
+  let snap = new midtransClient.Snap({
+    isProduction: false,
+    serverKey: serverKey,
+  })
+
+  // 1. Buat Order ID yang PENDEK (aman dari limit 50 karakter Midtrans)
+  const orderId = `TXN-${Date.now()}`
+
   const { data: profile } = await supabase.from('profiles').select('nama').eq('id', user.id).single()
 
-  // Buat ID Order unik (menggunakan user_id agar mudah di-trace saat webhook)
-  // Format: UPGRADE_[user_id]_[timestamp]
-  const order_id = `UPGRADE_${user.id}_${Date.now()}` // FULL UUID
-
-  // Parameter transaksi yang dikirim ke Midtrans
+  // 2. Simpan User ID di custom_field1 (aman dari limit order_id)
   const parameter = {
     transaction_details: {
-      order_id: order_id,
-      gross_amount: 99000 // Harga Rp 99.000
+      order_id: orderId,
+      gross_amount: 99000
     },
     item_details: [
       {
@@ -41,17 +44,15 @@ export async function POST(request: NextRequest) {
     customer_details: {
       first_name: profile?.nama || 'User',
       email: user.email
-    }
+    },
+    custom_field1: user.id // INI KUNCINYA: Sembunyikan UUID di sini
   }
 
   try {
-    // Minta Token ke Midtrans
     const transaction = await snap.createTransaction(parameter)
-    
-    // Kirim token ke frontend agar bisa membuka pop-up Snap
     return NextResponse.json({ snapToken: transaction.token })
   } catch (error: any) {
-    console.error('Midtrans Error:', error)
-    return NextResponse.json({ error: 'Gagal membuat transaksi' }, { status: 500 })
+    console.error('Midtrans Create Error:', error.message)
+    return NextResponse.json({ error: 'Gagal membuat transaksi di Midtrans' }, { status: 500 })
   }
 }
