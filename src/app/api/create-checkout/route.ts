@@ -22,11 +22,12 @@ export async function POST(request: NextRequest) {
 
   // Buat ID Order unik (menggunakan user_id agar mudah di-trace saat webhook)
   // Format: UPGRADE_[user_id]_[timestamp]
-  const orderId = `UPGRADE_${user.id}_${Date.now()}` // FULL UUID
+  const order_id = `UPGRADE_${user.id}_${Date.now()}` // FULL UUID
+
   // Parameter transaksi yang dikirim ke Midtrans
   const parameter = {
     transaction_details: {
-      order_id: orderId,
+      order_id: order_id,
       gross_amount: 99000 // Harga Rp 99.000
     },
     item_details: [
