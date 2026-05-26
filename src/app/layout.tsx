@@ -55,6 +55,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className="dark">
       <head>
+       <link rel="manifest" href="/manifest.json" /> {/* Fallback jika metadata diatas tidak jalan */}
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" /> {/* Untuk iOS */}
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
         <Script 
           type="text/javascript" 
