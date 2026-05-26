@@ -70,11 +70,11 @@ export default async function DashboardLayout({
   // Jika semuanya aman, render dashboard
   return (
     <div className="flex min-h-screen bg-[#0a0f0d]">
-      <div className="hidden md:block">
+      <div className="hidden md:flex flex-shrink-0">
         <AppSidebar profile={safeProfile} />
       </div>
 
-      <main className="flex-1 flex flex-col overflow-hidden md:ml-64">
+      <main className="flex-1 flex flex-col overflow-hidden">
         <header className="sticky top-0 z-40 h-16 border-b border-[#2dd4a0]/10 backdrop-blur-md bg-[#0a0f0d]/80 flex items-center justify-between px-4 md:px-8">
           <div className="flex items-center gap-4">
             <div className="md:hidden">
